@@ -1,49 +1,61 @@
-export const getRoot = () => {
-    fetch("https://api.github.com/user?access_token=49b49575041eb0db07b44985c3111981f3f4b75a").then(resp => {
-        console.log("resp", resp)
-    });
-}
-
-export const getUserInfo1 = () => {
-    fetch("https://api.github.com/user", {
-        method: "GET",
-        headers: {
-            Accept: "application/vnd.github.v3+json",
-            Authorization: "token 93ad4ee6e956d031eecff389f7479dbce46b6d95"
-        }
-    }).then(resp => {
-        return resp.json()
-    }).then(respjson => {
-        console.log("json", respjson)
-    })
-}
-
 export interface UserInfo {
+    avatar_url: string
     login: string
-    name?: string
-    avatar_url?: string
+    name: string
+    company: string
+    email: string
+    html_url: string
+    bio: string
 }
 
-export const getUserInfo = (): UserInfo => {
-    let returnValue: UserInfo = { login: "" }
-    fetch("https://api.github.com/user", {
-        method: "GET",
-        headers: {
+export const defaultUserInfo = {
+    avatar_url: "",
+    login: "",
+    name: "",
+    company: "",
+    email: "",
+    html_url: "",
+    bio: ""
+}
+
+export const getUserInfo = (token: string | null, name: string | null, callback: (error: string | null, resp: UserInfo) => void) => {
+    let requestUrl = "";
+    let headers = {};
+    if (token !== null) {
+        requestUrl = "https://api.github.com/user";
+        headers = {
             Accept: "application/vnd.github.v3+json",
-            Authorization: "token 93ad4ee6e956d031eecff389f7479dbce46b6d95"
+            Authorization: `token ${token}`
         }
+    } else if (name !== null) {
+        requestUrl = `https://api.github.com/users/${name}`;
+        headers = {
+            Accept: "application/vnd.github.v3+json"
+        }
+    }
+
+    fetch(requestUrl, {
+        method: "GET",
+        headers: headers
     })
-        .then(rawResp => rawResp.json())
-        .then(jsonResp => {
-            console.log("json", jsonResp)
-            returnValue = {
-                login: jsonResp.login,
-                name: jsonResp.name,
-                avatar_url: jsonResp.avatar_url
+        .then(resp => {
+            if (resp.status !== 200) {
+                throw ("Error in the call!");
             }
+            return resp.json()
+        })
+        .then(rawJson => {
+            callback(null, {
+                avatar_url: rawJson.avatar_url,
+                login: rawJson.login,
+                name: rawJson.name,
+                company: rawJson.company,
+                email: rawJson.email,
+                html_url: rawJson.html_url,
+                bio: rawJson.bio
+            })
         })
         .catch(error => {
-            console.error("ERROR in getting user info")
+            callback(error, defaultUserInfo);
         })
-    return returnValue
 }

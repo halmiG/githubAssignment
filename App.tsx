@@ -1,60 +1,33 @@
-import React from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
-import * as network from "./network/network"
-import { UserInfo } from "./network/network"
+import React from "react";
+import { View, Text } from 'react-native';
+import { createStackNavigator } from 'react-navigation';
+import InputForm from "./screens/inputForm/InputForm";
+import UserInfo from "./screens/userInfo/UserInfo";
 
-interface Props {
-
-}
-
-interface State {
-  text: string
-  userInfo: UserInfo
-}
-
-export default class App extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      text: "",
-      userInfo: {
-        login: ""
-      }
+const RootStack = createStackNavigator(
+    {
+        Input: InputForm,
+        Info: UserInfo
+    },
+    {
+        initialRouteName: "Input",
+        navigationOptions: {
+            headerStyle: {
+                backgroundColor: "#489AF9",
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+                fontWeight: 'bold',
+            },
+            headerBackTitle: null
+        }
     }
-  }
+);
 
-  componentDidMount() {
-    const userInfo = network.getUserInfo()
-    console.log("mount", userInfo)
-    this.setState({ userInfo: userInfo })
-  }
-
-  onButtonPressed = () => {
-    // network.getRoot();
-    // network.getUserInfo()
-    this.setState({ text: this.state.text === "" ? "Gomb!" : "" });
-  }
-
-  render() {
-    const { userInfo } = this.state
-    console.log("info", userInfo)
+const App = () => {
     return (
-      <View style={styles.container}>
-        <Text>Hello GVilág!</Text>
-        <Text>{userInfo.name}</Text>
-        <Text>{userInfo.login}</Text>
-        <Text>{this.state.text}</Text>
-        <Button title="NyomdMEG" onPress={this.onButtonPressed} />
-      </View>
-    );
-  }
+        <RootStack />
+    )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
